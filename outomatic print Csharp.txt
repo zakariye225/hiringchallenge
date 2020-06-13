@@ -1,0 +1,40 @@
+                    DialogResult dialogResult = MessageBox.Show(this, "Successfuly Booked; Would You Want to print", "Information", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                    if (dialogResult == DialogResult.Yes)
+                    {
+                        using (SqlConnection conn = Modules.Connection.getconnection())
+                        {
+                            SqlCommand cmd = new SqlCommand("SPSelectCheckinByID", conn);
+                            cmd.CommandType = CommandType.StoredProcedure;
+                            cmd.Parameters.AddWithValue("@ID", txtCheckinID.Text);
+                            cmd.ExecuteNonQuery();
+                            SqlDataAdapter da = new SqlDataAdapter();
+                            da.SelectCommand = cmd;
+                            DataTable dt = new DataTable();
+                            da.Fill(dt);
+                            RptCheckSelectID RP = new RptCheckSelectID();
+                            RP.SetDataSource(dt);
+
+                            ReportViewerForm rvf = new ReportViewerForm();
+                            //rvf.RptCheckSelectID1.Load();
+                            rvf.crystalReportViewer1.ReportSource=RP;
+                           // rvf.RptCheckSelectID1.SetDataSource(dt);
+                            rvf.RptCheckSelectID1.Refresh();
+                            rvf.WindowState = FormWindowState.Maximized;
+                            rvf.RptCheckSelectID1.Refresh();
+                            this.Hide();
+                            rvf.Show();
+                            paymentinsertion();
+                            RoomUpdate();
+                            clear();
+                            Modules.GeneralCode.autoID("CheckIns", "ID", txtCheckinID);
+                            Modules.GeneralCode.Readgv("CheckIns", dataGridView1);
+
+                        }
+                    }
+                    else if (dialogResult == DialogResult.No)
+                    {
+                    RoomUpdate();
+                    clear();
+                    Modules.GeneralCode.autoID("CheckIns", "ID", txtCheckinID);
+                    Modules.GeneralCode.Readgv("CheckIns", dataGridView1);
+                    }
