@@ -1,0 +1,148 @@
+<configuration>
+    <startup> 
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+    </startup>
+<connectionStrings>
+   <add name="HMSConnectionString" providerName="System.Data.SqlClient"
+            connectionString="Data Source=ZAKI-PC\SQLEXPRESS;Initial Catalog=HSS; Integrated Security=true"/> 
+
+</connectionStrings>
+<startup useLegacyV2RuntimeActivationPolicy="true">
+   <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0"/>
+</startup>
+</configuration>
+============================================================================================
+
+ class Connection
+    {
+        public static SqlConnection getconnection()
+        {
+            //SqlConnection con = new SqlConnection();
+            //con = new SqlConnection(ConfigurationManager.ConnectionStrings["MyDBConnectionString "].ConnectionString);
+            //con.Open();
+            string str = ConfigurationManager.ConnectionStrings["HMSConnectionString"].ConnectionString;
+            SqlConnection con = new SqlConnection(str);
+            con.Open();
+            return con;
+        }
+    }
+==============================================================================================
+        // ID GENERATED CODE STARTS HERE
+        public static void autoID(string table, string field, TextBox text)
+        {
+            long lastid;
+            using (SqlConnection con = Connection.getconnection())
+            {
+                SqlCommand cm = new SqlCommand("select max(" + field + ")  from  " + table, con);
+                cm.ExecuteScalar();
+                if (DBNull.Value.Equals(cm.ExecuteScalar()))
+                {
+                    lastid = 1;
+                }
+                else
+                {
+                    lastid = Convert.ToInt32(cm.ExecuteScalar()) + 1;
+                }
+                text.Text = lastid.ToString();
+                //txt.Enabled = false;
+
+
+
+            }
+        }
+        // ID GENERATED CODE ENDS HERE
+
+        public static void Readgv(string table, DataGridView gv)
+        {
+            using (SqlConnection con = Connection.getconnection())
+            {
+                string str = ("Select * from " + table);
+                SqlDataAdapter da = new SqlDataAdapter(str, con);
+                DataSet ds = new DataSet();
+                da.Fill(ds, table);
+                gv.DataSource = ds;
+                gv.DataMember = table;
+            }
+        }
+        public static void Populatecombo(string table, string field, ComboBox combo)
+        {
+            using (SqlConnection con = Connection.getconnection())
+            {
+                string query = "select " + field + " from " + table;
+                SqlDataAdapter da = new SqlDataAdapter(query, con);
+                DataSet ds = new DataSet();
+                da.Fill(ds, table);
+                combo.DisplayMember = field;
+                combo.ValueMember = field;
+                combo.DataSource = ds.Tables[table];
+
+            }
+        }
+
+
+==========================================================================================
+
+Addational
+----------------
++++++++++
+=========
+        private void populategrid()
+        {
+            using (SqlConnection con = General_Codes.Connection.getconnection())
+            {
+                string str = "select * from Food_T";
+                SqlDataAdapter da = new SqlDataAdapter(str,con);
+                DataSet ds = new DataSet();
+                da.Fill(ds, "Food_T");
+                dataGridView1.DataSource = ds;
+                dataGridView1.DataMember = "Food_T";
+
+            }
+        }
+        private void AutoID()
+        {
+            int lastid;
+            using (SqlConnection con = General_Codes.Connection.getconnection())
+            {
+                SqlCommand cmd = new SqlCommand("select max(FoodID) from Food_T", con);
+                cmd.ExecuteScalar();
+                if (DBNull.Value.Equals(cmd.ExecuteScalar()))
+                {
+                    lastid = 1;
+                   
+                }
+                else
+                {
+                    lastid = Convert.ToInt32(cmd.ExecuteScalar())+1;
+                }
+            }
+
+            txtfoodid.Text = Convert.ToString(lastid);
+            txtfoodid.Enabled = false;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (txtfoodid.Text.Equals("") || textBox2.Text.Equals("") || textBox3.Text.Equals(""))
+            {
+                MessageBox.Show("plz fill empty fields.");
+                textBox2.Focus();
+            }
+            else { 
+            using (SqlConnection con = General_Codes.Connection.getconnection())
+            {
+                string query = "insert into Food_T values(@d1,@d2,@d3)";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@d1", txtfoodid.Text);
+                cmd.Parameters.AddWithValue("@d2", textBox2.Text);
+                cmd.Parameters.AddWithValue("@d3", textBox3.Text);
+                cmd.ExecuteNonQuery();
+                cmd.Parameters.Clear();
+                textBox2.Text = "";
+                textBox3.Text = "";
+                AutoID();
+                populategrid();
+            }
+            }
+        }
+==============================================================================================
