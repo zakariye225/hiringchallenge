@@ -1,0 +1,152 @@
+
+web config 
+=========================================================================================================================
+<connectionStrings>
+    <add name="OnlineHospitalConnectionString" connectionString="Data Source=ZAKI-PC\SQLEXPRESS;Initial Catalog=Hospital;Integrated Security=True" providerName="System.Data.SqlClient"/>
+  </connectionStrings>
+  
+    <system.web>
+      <compilation debug="true" targetFramework="4.5" />
+      <httpRuntime targetFramework="4.5" />
+    </system.web>
+   <appSettings>
+      <add key="ValidationSettings:UnobtrusiveValidationMode" value="None" />
+    </appSettings>
+==========================================================================================================================
+
+Connection file
+============================================================================================================================
+ public static SqlConnection getconnection()
+    {
+
+        string str = ConfigurationManager.ConnectionStrings["OnlineHospitalConnectionString"].ConnectionString;
+        SqlConnection conn = new SqlConnection(str);
+        conn.Open();
+        return conn;
+    ==============================================================================================================
+
+General codes
+=================================================================================================================
+    //Fill Dropdown Starts Here
+    public static void PopulateDropdown(string Table, string field, DropDownList DDList, string Comment)
+    {
+        try
+        {
+            using (SqlConnection con = Connection.getconnection())
+            {
+                string query = "select * from " + Table;
+                SqlDataAdapter da = new SqlDataAdapter(query, con);
+                DataSet ds = new DataSet();
+                da.Fill(ds);
+                DDList.DataTextField = ds.Tables[0].Columns[field].ToString();
+                DDList.DataSource = ds.Tables[0];
+                DDList.DataBind();
+                DDList.Items.Insert(0, new ListItem(Comment, ""));
+
+            }
+        }
+        catch (Exception ex)
+        {
+
+            throw ex;
+        }
+    }
+    //Fill Dropdown Ends Here
+
+
+
+    // Fill Gridview Starts Here 
+    public static void Populategreadvew(string table, GridView dgv)
+    {
+        try
+        {
+            using (SqlConnection con = Connection.getconnection())
+            {
+                SqlDataAdapter da = new SqlDataAdapter("select * from " + table, con);
+                DataSet ds = new DataSet();
+                da.Fill(ds, table);
+                dgv.DataSource = ds;
+                dgv.DataBind();
+            }
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+    // Fill Gridview Ends Here 
+
+    // ID GENERATED CODE STARTS HERE
+    public static void autoID(string table, string field, TextBox text)
+    {
+        try
+        {
+            Int64 lastid;
+            using (SqlConnection con = Connection.getconnection())
+            {
+                SqlCommand cm = new SqlCommand("select max(" + field + ")  from  " + table, con);
+                cm.ExecuteScalar();
+                if (DBNull.Value.Equals(cm.ExecuteScalar()))
+                {
+                    lastid = 1;
+                }
+                else
+                {
+                    lastid = Convert.ToInt32(cm.ExecuteScalar()) + 1;
+                }
+                text.Text = lastid.ToString();
+                text.ReadOnly = true;
+                //txt.Enabled = false;
+
+
+
+            }
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+    // ID GENERATED CODE ENDS HERE
+
+    public static void AddLogs(string UserName, DateTime Date, string Operation)
+    {
+        try
+        {
+            using (SqlConnection con = Connection.getconnection())
+            {
+                String Sql = "Insert into Logs values('" + UserName + "','" + Date + "','" + Operation + "')";
+                SqlCommand cmd = new SqlCommand(Sql, con);
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception)
+        {
+
+        }
+    }
+========================================================================================================================
+
+insert + update
+===================================================================================================================
+   using (SqlConnection con = Connection.getconnection())
+                {
+                    //int User = 1;
+                    string UpdatedDate = DateTime.Now.ToShortDateString();
+                    SqlCommand cmd = new SqlCommand("SP_Patient", con);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@ID", txtpatientID.Text);
+                    cmd.Parameters.AddWithValue("@Name", txtPatientName.Text);
+                    cmd.Parameters.AddWithValue("@Gender", DDGender.Text);
+                    cmd.Parameters.AddWithValue("@ContactNo", txtContact1.Text);
+                    cmd.Parameters.AddWithValue("@Email", txtEmailAddress.Text);
+                    cmd.Parameters.AddWithValue("@Address", DDAddress.Text);
+                    cmd.Parameters.AddWithValue("@Other", txtOthers.Text);
+                    cmd.Parameters.AddWithValue("@Age", txtage.Text);
+                    cmd.Parameters.AddWithValue("@RegDate", txtRegDate.Text);
+                    cmd.Parameters.AddWithValue("@UserName", txtContact1.Text);
+                    cmd.Parameters.AddWithValue("@Password", txtContact1.Text);
+                    cmd.Parameters.AddWithValue("@UserEntered", "Zaki");
+}
+======================================================================================================================
+
